@@ -31,3 +31,4 @@ export class StaticDataSource {
   Observable<Order> {console.log(JSON.stringify(order))
     return from([order])
 }
+}

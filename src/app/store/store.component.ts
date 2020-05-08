@@ -13,14 +13,24 @@ export class StoreComponent {
   public selectedCategory = null
   public productsPerPage = 4
   public selectedPage = 1
+  public searchTerm = null
 
   constructor(private repository: ProductRepository,private cart: Cart,private router:Router) {}
 
   get products(): Product[] {
     let pageIndex = (this.selectedPage - 1) * this.productsPerPage
-    return this.repository
+
+    if(this.searchTerm == null)
+    {
+      return this.repository
       .getProducts(this.selectedCategory)
-      .slice(pageIndex, pageIndex + this.productsPerPage)
+      .slice(pageIndex, pageIndex + this.productsPerPage)  
+    }
+    else
+    {
+      let templist = this.repository.getProducts(this.selectedCategory)
+      return templist.filter(s => s.name.toLowerCase().includes(this.searchTerm.toLowerCase())).slice(pageIndex, pageIndex + this.productsPerPage)
+    }
   }
 
   get categories(): string[] {
@@ -29,6 +39,7 @@ export class StoreComponent {
 
   changeCategory(newCategory?: string) {
     this.selectedPage = 1
+    this.searchTerm = null
     this.selectedCategory = newCategory
   }
 

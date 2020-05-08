@@ -723,9 +723,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     /* harmony import */
 
 
-    var _static_datasource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(
-    /*! ./static.datasource */
-    "./src/app/model/static.datasource.ts");
+    var _rest_datasource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(
+    /*! ./rest.datasource */
+    "./src/app/model/rest.datasource.ts");
 
     var OrderRepository =
     /*#__PURE__*/
@@ -735,11 +735,26 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         this.dataSource = dataSource;
         this.orders = [];
+        this.loaded = false;
       }
 
       _createClass(OrderRepository, [{
+        key: "loadOrders",
+        value: function loadOrders() {
+          var _this2 = this;
+
+          this.loaded = true;
+          this.dataSource.getOrders().subscribe(function (orders) {
+            return _this2.orders = orders;
+          });
+        }
+      }, {
         key: "getOrders",
         value: function getOrders() {
+          if (!this.loaded) {
+            this.loadOrders();
+          }
+
           return this.orders;
         }
       }, {
@@ -747,13 +762,35 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         value: function saveOrder(order) {
           return this.dataSource.saveOrder(order);
         }
+      }, {
+        key: "updateOrder",
+        value: function updateOrder(order) {
+          var _this3 = this;
+
+          this.dataSource.updateOrder(order).subscribe(function (order) {
+            _this3.orders.splice(_this3.orders.findIndex(function (o) {
+              return o.id == order.id;
+            }), 1, order);
+          });
+        }
+      }, {
+        key: "deleteOrder",
+        value: function deleteOrder(id) {
+          var _this4 = this;
+
+          this.dataSource.deleteOrder(id).subscribe(function (order) {
+            _this4.orders.splice(_this4.orders.findIndex(function (o) {
+              return id == o.id;
+            }));
+          });
+        }
       }]);
 
       return OrderRepository;
     }();
 
     OrderRepository.ɵfac = function OrderRepository_Factory(t) {
-      return new (t || OrderRepository)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](_static_datasource__WEBPACK_IMPORTED_MODULE_1__["StaticDataSource"]));
+      return new (t || OrderRepository)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](_rest_datasource__WEBPACK_IMPORTED_MODULE_1__["RestDataSource"]));
     };
 
     OrderRepository.ɵprov = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjectable"]({
@@ -767,7 +804,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"]
       }], function () {
         return [{
-          type: _static_datasource__WEBPACK_IMPORTED_MODULE_1__["StaticDataSource"]
+          type: _rest_datasource__WEBPACK_IMPORTED_MODULE_1__["RestDataSource"]
         }];
       }, null);
     })();
@@ -836,15 +873,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     /* harmony import */
 
 
-    var _static_datasource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(
-    /*! ./static.datasource */
-    "./src/app/model/static.datasource.ts");
+    var _rest_datasource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(
+    /*! ./rest.datasource */
+    "./src/app/model/rest.datasource.ts");
 
     var ProductRepository =
     /*#__PURE__*/
     function () {
       function ProductRepository(dataSource) {
-        var _this2 = this;
+        var _this5 = this;
 
         _classCallCheck(this, ProductRepository);
 
@@ -852,8 +889,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         this.products = [];
         this.categories = [];
         dataSource.getProducts().subscribe(function (data) {
-          _this2.products = data;
-          _this2.categories = data.map(function (p) {
+          _this5.products = data;
+          _this5.categories = data.map(function (p) {
             return p.category;
           }).filter(function (c, index, array) {
             return array.indexOf(c) == index;
@@ -881,13 +918,41 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         value: function getCategories() {
           return this.categories;
         }
+      }, {
+        key: "saveProduct",
+        value: function saveProduct(product) {
+          var _this6 = this;
+
+          if (product.id == null || product.id == 0) {
+            this.dataSource.saveProduct(product).subscribe(function (p) {
+              return _this6.products.push(p);
+            });
+          } else {
+            this.dataSource.updateProduct(product).subscribe(function (p) {
+              _this6.products.splice(_this6.products.findIndex(function (p) {
+                return p.id == product.id;
+              }), 1, product);
+            });
+          }
+        }
+      }, {
+        key: "deleteProduct",
+        value: function deleteProduct(id) {
+          var _this7 = this;
+
+          this.dataSource.deleteProduct(id).subscribe(function (p) {
+            _this7.products.splice(_this7.products.findIndex(function (p) {
+              return p.id == id;
+            }), 1);
+          });
+        }
       }]);
 
       return ProductRepository;
     }();
 
     ProductRepository.ɵfac = function ProductRepository_Factory(t) {
-      return new (t || ProductRepository)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](_static_datasource__WEBPACK_IMPORTED_MODULE_1__["StaticDataSource"]));
+      return new (t || ProductRepository)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](_rest_datasource__WEBPACK_IMPORTED_MODULE_1__["RestDataSource"]));
     };
 
     ProductRepository.ɵprov = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjectable"]({
@@ -901,7 +966,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"]
       }], function () {
         return [{
-          type: _static_datasource__WEBPACK_IMPORTED_MODULE_1__["StaticDataSource"]
+          type: _rest_datasource__WEBPACK_IMPORTED_MODULE_1__["RestDataSource"]
         }];
       }, null);
     })();
@@ -973,13 +1038,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       }, {
         key: "authenticate",
         value: function authenticate(user, pass) {
-          var _this3 = this;
+          var _this8 = this;
 
           return this.http.post(this.baseUrl + 'login', {
             name: user,
             password: pass
           }).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__["map"])(function (response) {
-            _this3.auth_token = response.success ? response.token : null;
+            _this8.auth_token = response.success ? response.token : null;
             return response.success;
           }));
         }
@@ -2013,16 +2078,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       _createClass(CheckoutComponent, [{
         key: "submitOrder",
         value: function submitOrder(form) {
-          var _this4 = this;
+          var _this9 = this;
 
           this.submitted = true;
 
           if (form.valid) {
             this.repository.saveOrder(this.order).subscribe(function (order) {
-              _this4.order.clear();
+              _this9.order.clear();
 
-              _this4.orderSent = true;
-              _this4.submitted = false;
+              _this9.orderSent = true;
+              _this9.submitted = false;
             });
           }
         }

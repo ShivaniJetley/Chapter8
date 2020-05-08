@@ -340,7 +340,7 @@ Order.ɵprov = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjectable"
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "OrderRepository", function() { return OrderRepository; });
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/__ivy_ngcc__/fesm2015/core.js");
-/* harmony import */ var _static_datasource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./static.datasource */ "./src/app/model/static.datasource.ts");
+/* harmony import */ var _rest_datasource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./rest.datasource */ "./src/app/model/rest.datasource.ts");
 
 
 
@@ -348,19 +348,37 @@ class OrderRepository {
     constructor(dataSource) {
         this.dataSource = dataSource;
         this.orders = [];
+        this.loaded = false;
+    }
+    loadOrders() {
+        this.loaded = true;
+        this.dataSource.getOrders().subscribe((orders) => (this.orders = orders));
     }
     getOrders() {
+        if (!this.loaded) {
+            this.loadOrders();
+        }
         return this.orders;
     }
     saveOrder(order) {
         return this.dataSource.saveOrder(order);
     }
+    updateOrder(order) {
+        this.dataSource.updateOrder(order).subscribe((order) => {
+            this.orders.splice(this.orders.findIndex((o) => o.id == order.id), 1, order);
+        });
+    }
+    deleteOrder(id) {
+        this.dataSource.deleteOrder(id).subscribe((order) => {
+            this.orders.splice(this.orders.findIndex((o) => id == o.id));
+        });
+    }
 }
-OrderRepository.ɵfac = function OrderRepository_Factory(t) { return new (t || OrderRepository)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](_static_datasource__WEBPACK_IMPORTED_MODULE_1__["StaticDataSource"])); };
+OrderRepository.ɵfac = function OrderRepository_Factory(t) { return new (t || OrderRepository)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](_rest_datasource__WEBPACK_IMPORTED_MODULE_1__["RestDataSource"])); };
 OrderRepository.ɵprov = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjectable"]({ token: OrderRepository, factory: OrderRepository.ɵfac });
 /*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](OrderRepository, [{
         type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"]
-    }], function () { return [{ type: _static_datasource__WEBPACK_IMPORTED_MODULE_1__["StaticDataSource"] }]; }, null); })();
+    }], function () { return [{ type: _rest_datasource__WEBPACK_IMPORTED_MODULE_1__["RestDataSource"] }]; }, null); })();
 
 
 /***/ }),
@@ -399,7 +417,7 @@ class Product {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ProductRepository", function() { return ProductRepository; });
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/__ivy_ngcc__/fesm2015/core.js");
-/* harmony import */ var _static_datasource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./static.datasource */ "./src/app/model/static.datasource.ts");
+/* harmony import */ var _rest_datasource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./rest.datasource */ "./src/app/model/rest.datasource.ts");
 
 
 
@@ -408,29 +426,44 @@ class ProductRepository {
         this.dataSource = dataSource;
         this.products = [];
         this.categories = [];
-        dataSource.getProducts().subscribe(data => {
+        dataSource.getProducts().subscribe((data) => {
             this.products = data;
             this.categories = data
-                .map(p => p.category)
+                .map((p) => p.category)
                 .filter((c, index, array) => array.indexOf(c) == index)
                 .sort();
         });
     }
     getProducts(category = null) {
-        return this.products.filter(p => category == null || category == p.category);
+        return this.products.filter((p) => category == null || category == p.category);
     }
     getProduct(id) {
-        return this.products.find(p => p.id == id);
+        return this.products.find((p) => p.id == id);
     }
     getCategories() {
         return this.categories;
     }
+    saveProduct(product) {
+        if (product.id == null || product.id == 0) {
+            this.dataSource.saveProduct(product).subscribe((p) => this.products.push(p));
+        }
+        else {
+            this.dataSource.updateProduct(product).subscribe((p) => {
+                this.products.splice(this.products.findIndex((p) => p.id == product.id), 1, product);
+            });
+        }
+    }
+    deleteProduct(id) {
+        this.dataSource.deleteProduct(id).subscribe((p) => {
+            this.products.splice(this.products.findIndex((p) => p.id == id), 1);
+        });
+    }
 }
-ProductRepository.ɵfac = function ProductRepository_Factory(t) { return new (t || ProductRepository)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](_static_datasource__WEBPACK_IMPORTED_MODULE_1__["StaticDataSource"])); };
+ProductRepository.ɵfac = function ProductRepository_Factory(t) { return new (t || ProductRepository)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](_rest_datasource__WEBPACK_IMPORTED_MODULE_1__["RestDataSource"])); };
 ProductRepository.ɵprov = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjectable"]({ token: ProductRepository, factory: ProductRepository.ɵfac });
 /*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](ProductRepository, [{
         type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"]
-    }], function () { return [{ type: _static_datasource__WEBPACK_IMPORTED_MODULE_1__["StaticDataSource"] }]; }, null); })();
+    }], function () { return [{ type: _rest_datasource__WEBPACK_IMPORTED_MODULE_1__["RestDataSource"] }]; }, null); })();
 
 
 /***/ }),

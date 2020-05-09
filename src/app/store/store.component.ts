@@ -29,7 +29,8 @@ export class StoreComponent {
     else
     {
       let templist = this.repository.getProducts(this.selectedCategory)
-      return templist.filter(s => s.name.toLowerCase().includes(this.searchTerm.toLowerCase())).slice(pageIndex, pageIndex + this.productsPerPage)
+      return templist.filter(s => (s.name.toLowerCase().includes(this.searchTerm.toLowerCase())) || (s.description.toLowerCase().includes(this.searchTerm.toLowerCase())))
+      .slice(pageIndex, pageIndex + this.productsPerPage)
     }
   }
 
